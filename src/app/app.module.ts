@@ -6,25 +6,43 @@ import { StatusBar } from '@ionic-native/status-bar';
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
+import { GroupPage } from '../pages/group/group';
+import { NewGroupPage } from '../pages/newgroup/newgroup';
+
+//provider
+import { Contacts } from '@ionic-native/contacts';
+
+import { IonicStorageModule } from '@ionic/storage';
+import { CallLog } from '@ionic-native/call-log';
+
+import { GroupListService } from '../providers/group-list/group-list';
 
 @NgModule({
   declarations: [
     MyApp,
-    HomePage
+    HomePage,
+    GroupPage,
+    NewGroupPage
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage
+    HomePage,
+    GroupPage,
+    NewGroupPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    Contacts,
+    CallLog,
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    GroupListService
   ]
 })
 export class AppModule {}
