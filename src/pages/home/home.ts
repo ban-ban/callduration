@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, ModalController } from 'ionic-angular';
-import { Contacts, Contact, ContactField, ContactName } from '@ionic-native/contacts';
 import { GroupPage } from '../group/group' ;
 import { NewGroupPage } from '../newgroup/newgroup' ;
 import { Storage } from '@ionic/storage';
@@ -12,16 +11,11 @@ import { Group } from '../../interfaces/group.interface' ;
   templateUrl: 'home.html'
 })
 export class HomePage {
-  myContacts: Contact[];
   nameLetters:string;
   groupList:Group[];
  
 
-  constructor(public navCtrl: NavController,public navParams: NavParams,private contacts: Contacts,private storage: Storage, private _groupList: GroupListService,private modalCtrl:ModalController) {
-    //this.myContacts[0].displayName="affichage contact 0";
-    //this.myContacts[0].id="1111";
-    this.myContacts=[];
-    this.nameLetters="Ar";
+  constructor(public navCtrl: NavController,public navParams: NavParams,private storage: Storage, private _groupList: GroupListService,private modalCtrl:ModalController) {
     this.storage.ready().then(()=>{
       this.storage.get("groupList").then((data)=>{
       console.log("constructor home, storage results");
@@ -49,7 +43,7 @@ export class HomePage {
       this.storage.set("groupList",this.groupList);
       });
     })
-    .catch((err)=>{ console.log("storage pas ready:" + err)});
+    .catch((err)=>{ console.log("storage not ready:" + err)});
   }
 
   IonViewDidLoad (){
@@ -70,23 +64,16 @@ export class HomePage {
    });
  }
 
-
-alertContacts(){
-  
-  this.contacts.find(['displayName'], {filter: this.nameLetters}).then((results)=>{
-    this.myContacts=results;
-    console.log(results);
-    alert(this.myContacts[0].displayName +  "\n" +
-          this.myContacts[0].id +  "\n" +
-          this.myContacts[1].displayName +  "\n" +
-          this.myContacts[1].id +  "\n" +
-          this.myContacts[2].displayName +  "\n" +
-          this.myContacts[2].id );
+ removeGroup(index:number){
+  this.groupList.splice(index,1);
+  this._groupList.removeGroup(index);
+     
+        //recrée le groupe dans storage et option: enregistre la date de modifications
+  this.storage.ready().then(()=>{
+       this.storage.set("groupList",this.groupList).then( ()=> {
+       });
   });
-  
-  
-}
-
+ }
 
 openPage(index:number){
   let modal=this.modalCtrl.create(GroupPage, {'groupIndex': index});
@@ -99,5 +86,6 @@ openPage(index:number){
 
   });
 }
+
 
 }

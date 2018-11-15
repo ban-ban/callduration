@@ -18,7 +18,11 @@ export class NewGroupPage {
     newMember:string;
     searchName:string;
     members:string[];
+    phoneNumbers:string[];
+    ids:string[];
     plus: boolean;
+    readOnly: boolean;
+    namereadOnly: boolean;
     myContacts: Contact[];
     
 
@@ -29,12 +33,16 @@ export class NewGroupPage {
       this.newMember="nouveau membre";
       this.searchName="";
       this.plus=false;
+      this.readOnly=false;
+      this.namereadOnly=false;
       this.myContacts=[];
       this.members=[]; 
+      this.phoneNumbers=[];
+      this.ids=[];
       
     }
    
-    findContacts(nameToSearch: string){
+    findContacts(){
         this.myContacts=[];
         this.contacts.find(['displayName'], {filter: this.searchName}).then((results)=>{
             this.myContacts=results;
@@ -44,26 +52,26 @@ export class NewGroupPage {
   
 
     selectContact(index: number){
+      let phone:string=this.myContacts[index].phoneNumbers[0].value;
+      let startnb:string=phone.slice(0,1);
+      if (startnb=="0"){
+        phone="+33"+phone.slice(1,phone.length);
+      }
       this.plus=false;
       this.members.push(this.myContacts[index].displayName);
-    }
-
-    updateGroupName(newGroupName:string) {
       
-      if (newGroupName != this.groupName) {
-        //modify storage of groupName
-        //groupList[indexGroup].groupName=newGroupName ;
-        console.log("newGroupName:" + newGroupName);
-        console.log("oldGroupName:" + this.groupName);
-        
-      }
+      this.phoneNumbers.push(phone);
+      this.ids.push(this.myContacts[index].id);
+      this.readOnly=true;
     }
 
-   
+      
 
     removeMember(index:number) {
       
       this.members.splice(index,1);
+      this.phoneNumbers.splice(index,1);
+      this.ids.splice(index,1);
     }
 
     addMember(){
@@ -71,16 +79,16 @@ export class NewGroupPage {
       this.searchName="";
 
       this.plus=true;
+      this.readOnly=false;
       
     }
 
     createGroup(){
        
-        //this.members.push("alban");
+        
         if (this.members.length>0){
-          this._groupList.addNewGroup(this.modifiedGroupName, this.members);
-          console.log("namegroup"+ this.modifiedGroupName, "members"+ this.members[0]);
-          
+          this._groupList.addNewGroup(this.modifiedGroupName, this.members, this.phoneNumbers, this.ids);
+         
           let groupList : Group[] = this._groupList.returnGroupList();
          // alert ('groupList: name :'+ groupList[0].name);
           //recrée le groupe dans storage et option: enregistre la date de modifications

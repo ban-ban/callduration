@@ -7,6 +7,7 @@
         <button ion-button icon-only (click)="addGroup()">
           <ion-icon name="add"></ion-icon>
         </button>
+        
     </ion-buttons>
   
   </ion-navbar>
@@ -19,7 +20,8 @@
 
     <ion-item *ngFor="let group of groupList; let i=index" (click)="openPage(i)">
       <h2 item-start>{{group.name}}</h2>
-      <h2 item-end>{{group.duration}}</h2>
+      <h2 item-end>{{group.duration | hminSeconds}}</h2>
+      
     </ion-item>
   
   </ion-list>

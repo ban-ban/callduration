@@ -1,14 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Group } from '../../interfaces/group.interface' ;
 import { CallLog, CallLogObject } from '@ionic-native/call-log';
+import { Contacts, Contact, ContactField, ContactName } from '@ionic-native/contacts';
 
 
 @Injectable()
 export class GroupListService {
   private _groupList:Group[]=[];
-  constructor(private callLog: CallLog) {
+  numbersArray: string[];
+  members :string[];
+
+  constructor(private callLog: CallLog, private contacts:Contacts) {
     console.log("constructor of group-list");
-  // this._groupList=[{name:"france-hpv",duration:25,members:["rodolphe"]}];
+    this.numbersArray=[];
+    this.members=[];
+  
   }
 
   loadGroupList(groupList: Group[]){
@@ -20,23 +26,31 @@ export class GroupListService {
     return this._groupList ;
   }
 
-  addNewGroup(title: string, persons:string[]){
+  removeGroup(index: number){
+    this._groupList.splice(index,1);
+    return;
+  }
+
+  addNewGroup(title: string, persons:string[],numbers: string[], ides:string[]){
     let newGroup:Group = {
             name : title,
             duration : 0,
-            members : persons
+            members : persons,
+            phoneNumbers: numbers,
+            ids: ides
     };
+
     console.log ("add new group : "+ newGroup.name+ " members : "+newGroup.members[0]);
     if (this._groupList.length == 0){
       //first time add a group
-      console.log("groupList  vide");
+      console.log("groupList  empty");
       this._groupList[0]= newGroup;
-      this._groupList[0].duration=this.calculate_duration(0);
+      this.calculateDuration(0);
     }
     else {
-      console.log("groupList  pas vide");
+      console.log("groupList not empty");
       this._groupList.unshift(newGroup); //concatenate at the beginning of the array
-      this._groupList[0].duration=this.calculate_duration(0);
+      this.calculateDuration(0);
     }
   }
 
@@ -46,53 +60,77 @@ export class GroupListService {
 
 
 
-  updateGroup(index:number, title: string, persons:string[]){
-    
+  updateGroup(index:number, title: string, persons:string[],numbers: string[], ides:string[]){
     this._groupList[index].name=title;
     this._groupList[index].members=persons;
-    this._groupList[index].duration=this.calculate_duration(index);
-  }
-
-  private calculate_duration(groupIndex: number){
-    let groupDuration: number=0;
-    let memberDuration: number;
-    let callDurations : number[]=[10,20,10,20];
-    let member: string="";
-  
-    for(let i=0;i<this._groupList[groupIndex].members.length;i++){
-      member=this._groupList[groupIndex].members[i];
-      memberDuration=0;
-           
-      //callDurations=getCallDurations(member);
-      
-      for(let j=0; j<callDurations.length ; j++){
-        memberDuration=memberDuration+callDurations[j];
-      }
-      groupDuration=groupDuration+memberDuration;
-    }
-    return groupDuration;
+    this._groupList[index].phoneNumbers=numbers;
+    this._groupList[index].ids=ides;
    
+    
+    this.calculateDuration(index);
+
+  //  // from https://forum.ionicframework.com/t/run-promises-in-a-loop/100198
+  //  // members is global var for use in function resolveAll
+  //  this.members=persons;
+  //  let count: number = 0;
+  //  this.resolveAll(this.contacts.find(['id'], {filter: this.members[count]}), count);
+    
   }
 
-  getCallDurations(contact:string){
-    let phonenumber1:string="+33651687613";
-    let phonenumber2:string="";
-    let totalDuration:number=0;
-    let filters: CallLogObject[] =[ {name: "number", value: phonenumber1, operator: '==' } ,
+ // private resolveAll(p: Promise<Contact[]>, count: number) {
+ //   p.then(results => {
+ //     this.numbersArray.push(results[0].phoneNumbers[0].value);
+ //     alert("results[0]"+results[0].phoneNumbers[0].value);
+ //     if (count < this.members.length) {
+//        //this.options.filter = members[++count];
+//        this.resolveAll(this.contacts.find(['id'], {filter: this.members[++count]}), count);
+//      } else {
+//        // HERE is the data you are looking for
+//        alert("resArr: " + JSON.stringify(this.numbersArray));
+//        this.essaiCallLog(this.numbersArray);
+//      }
+//    });
+//  }
+
+
+  calculateDuration(index: number){
+    let duration:number=0;
+    //let phonenumber1:string="+33651687613"; 
+  //  let filters: CallLogObject[] =[ {name: "number", value: ["+33651687613","+33675374400"], operator: "==" } ,
+   //                   {name:"date", value:"1541026800000", operator: ">="}];
+    
+    let filters: CallLogObject[] =[ {name: "number", value: this._groupList[index].phoneNumbers, operator: "==" } ,
                       {name:"date", value:"1541026800000", operator: ">="}];
     
-    let callDurations:number[];
 
-    this.callLog.getCallLog(filters).then((data)=>{
-      alert("promise from callLog: "+ JSON.stringify(data));
-      //callDurations=data.DURATION;
-    }).catch((err)=>{
-      alert("error calLog");
-    });
+  //or this.callLog.hasReadPermission()
+    this.callLog.requestReadPermission()
 
-    //calls transformés en durée
-    return totalDuration;
-
+    .then(()=>{
+        this.callLog.getCallLog(filters)
+            .then((data)=>{
+                for(let i=0; i<data.length;i++){
+                  duration=duration+data[i].duration;
+                }
+                
+             //   alert("duration : "+ duration + "\n" +
+             //   "data : " + JSON.stringify(data));
+          
+                this._groupList[index].duration=duration;
+                return ;
+            })
+            .catch((err)=>{
+                 alert("error getcallLog");
+                 return;
+                
+            });
+    })
+    .catch((err)=>{
+        
+        alert("error requestcalLog");
+        
+        return ;
+      });
   }
 
 }

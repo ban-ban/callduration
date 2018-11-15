@@ -8,6 +8,7 @@ import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { GroupPage } from '../pages/group/group';
 import { NewGroupPage } from '../pages/newgroup/newgroup';
+import { PipesModule} from '../pipes/pipes.module';
 
 //provider
 import { Contacts } from '@ionic-native/contacts';
@@ -26,6 +27,7 @@ import { GroupListService } from '../providers/group-list/group-list';
   ],
   imports: [
     BrowserModule,
+    PipesModule,
     IonicModule.forRoot(MyApp),
     IonicStorageModule.forRoot()
   ],
