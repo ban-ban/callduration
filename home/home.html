@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title text-center>
+      Call Duration
+    </ion-title>
+    <ion-buttons end>
+        <button ion-button icon-only (click)="addGroup()">
+          <ion-icon name="add"></ion-icon>
+        </button>
+        
+    </ion-buttons>
+  
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <button ion-button full color="primary" (click)="refreshDuration()">refresh</button>
+  
+  <ion-list>
+    <!--   <ion-item>
+      <ion-datetime displayFormat="MMMM" [(ngModel)]="myDate"></ion-datetime>
+    </ion-item>
+ -->
+
+    <ion-item *ngFor="let group of groupList; let i=index" (click)="openPage(i)">
+      <h2 item-start>{{group.name}}</h2>
+      <h2 item-end>{{group.duration | hminSeconds}}</h2>
+      
+    </ion-item>
+  
+  </ion-list>
+</ion-content>
